@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+  pre_build:
+    commands:
+      - echo "Installing dependencies..."
+      - npm install --production
+  build:
+    commands:
+      - echo "Build completed on $(date)"
+artifacts:
+  files:
+    - '**/*'
