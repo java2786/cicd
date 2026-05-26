@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+REGION="us-east-1"
+LOG="/var/log/codedeploy-userdata.log"
+exec > >(tee -a "$LOG") 2>&1
+
+yum update -y
+yum install -y ruby wget unzip
+
+curl -sS "https://aws-codedeploy-${REGION}.s3.${REGION}.amazonaws.com/latest/install" -o /tmp/install
+chmod +x /tmp/install
+/tmp/install auto
+
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl enable codedeploy-agent
+  systemctl start codedeploy-agent
+else
+  service codedeploy-agent start || true
+fi
+
+if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet codedeploy-agent; then
+  echo "codedeploy-agent running"
+else
+  service codedeploy-agent status 2>/dev/null || echo "codedeploy-agent failed; check $LOG"
+fi
